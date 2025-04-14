@@ -17,8 +17,8 @@ def get_driver_genes(xlsx_file):
 
 def get_mutation_counts_frequency(mutations_directory, driver_genes):
     """
-    Return mutation_counts_df for number of mutations in each cohort (mutation file)
-    and a DataFrame of frequency of mutations for each driver gene per cohort 
+    Returns 1D array with number of mutations in each cohort (mutation file)
+    and a DataFrame with mutation frequency for each driver gene per cohort 
     """
     mutation_counts = {}
     mutation_freqs = {}
