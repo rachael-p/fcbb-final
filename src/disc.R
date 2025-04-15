@@ -62,6 +62,7 @@ for (file_path in file_list) {
 }
 
 # save results to csv files 
+# TODO: change this so it only creates a file if list[[cancer_type]] is not empty 
 dir.create("results/mutexc", recursive = TRUE, showWarnings = FALSE)
 for (cancer_type in names(mutexc_list)) {
   write.csv(mutexc_list[[cancer_type]],
