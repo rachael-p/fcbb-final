@@ -3,87 +3,80 @@
 
 library(discover)
 library(readr)
-library(dplyr)
 library(tidyr)
+library(dplyr)
 
-# set up data reading
-driver_ref <- read_csv("results/mdg_per_cohort.csv")
+# import data
 directory <- "data/mutations"
 file_list <- list.files(directory, pattern = "\\.txt$", full.names = TRUE)
-result_list <- list()
+mutexc_list <- list()
+co_list <- list()
+driver_ref <- read_csv("results/mdg_per_cohort.csv", show_col_types = FALSE)
+driver_ref$Mutated_Driver_List <- strsplit(driver_ref$Mutated_Driver_Genes, ",")
+driver_ref$Mutated_Driver_List <- lapply(driver_ref$Mutated_Driver_List, function(x) toupper(trimws(x)))
 
-
-for (i in seq_along(file_list)) {
-    file_path <- file_list[i]
+for (file_path in file_list) {
     cancer_type <- strsplit(basename(file_path), "_")[[1]][1]
-
     data <- read_tsv(file_path, show_col_types = FALSE)
 
-    # Standardize gene names (first column)
-    gene_names <- toupper(data[[1]])
-    valid_rows <- !is.na(gene_names) & gene_names != ""
-    data <- data[valid_rows, ]
-    gene_names <- gene_names[valid_rows]
+    # pre-process and clean data
+    data[[1]] <- toupper(data[[1]])
+    valid_rows <- !is.na(data[[1]]) & data[[1]] != ""  # logical vector
+    data <- data[valid_rows, ]  # only keep rows with valid gene names
+    names(data)[1] <- "GENE"
+    data <- data %>%  # combine rows if have same gene twice in same file by ORing them
+            group_by(GENE) %>%
+            summarise(across(everything(), ~ as.integer(any(. == 1))), .groups = "drop")
 
-    # Add gene names as a new column and remove old one
-    data_clean <- data[ , -1]
-    data_clean$GENE <- gene_names
+    binary_matrix <- as.data.frame(data)
+    rownames(binary_matrix) <- binary_matrix$GENE  # turn gene col into rownames instead
+    binary_matrix$GENE <- NULL
+    colnames(binary_matrix) <- paste0(cancer_type, "_", colnames(binary_matrix))  # prepend cancer type to sample names
+    
+    row_totals <- rowSums(binary_matrix)
+    binary_matrix <- binary_matrix[row_totals > 0 & row_totals < ncol(binary_matrix), ]  # removes rows with all 0s or 1s (not useful for exc/co)
+    binary_matrix <- binary_matrix %>%
+        drop_na() %>%
+        mutate(across(everything(), ~ as.integer(pmin(1, .))))  # makes sures all values are binary (0 or 1)
 
-    # Remove duplicated gene names before setting rownames
-    data_clean <- data_clean %>%
-    distinct(GENE, .keep_all = TRUE) %>%
-    relocate(GENE)
 
-    # Convert to data.frame and set row names
-    data_clean_df <- as.data.frame(data_clean)
-    rownames(data_clean_df) <- data_clean_df$GENE
-    data_clean_df$GENE <- NULL  # Drop gene column now that it's row names
-
-    # Rename columns with cancer type prefix
-    cancer_type <- strsplit(basename(file_path), "_")[[1]][1]
-    colnames(data_clean_df) <- paste0(cancer_type, "_", colnames(data_clean_df))
-
-    # Filter rows that are not all 0 or all 1, drop NAs, force binary
-    binary_matrix <- data_clean_df %>%
-    filter(rowSums(.) > 0 & rowSums(.) < ncol(.)) %>%
-    drop_na() %>%
-    mutate(across(everything(), ~ as.integer(pmin(1, .))))
-
-    # Get driver gene list for this cancer type
+    # run tests
     driver_row <- driver_ref[driver_ref$Cohort == cancer_type, ]
-
-    # Parse comma-separated string of gene names
-    if (nrow(driver_row) > 0 && !is.na(driver_row$Mutated_Driver_Genes)) {
-        driver_genes <- strsplit(driver_row$Mutated_Driver_Genes, ",")[[1]] %>%
-                        toupper() %>%
-                        trimws()  # ensure upper case and no spaces
-
-        # Subset binary matrix to only those driver genes (and make sure they exist in the matrix)
-        driver_subset <- intersect(driver_genes, rownames(binary_matrix))
+    if (driver_row$Num_Mutated_Driver_Genes > 0) {
+        driver_genes <- driver_row$Mutated_Driver_List[[1]]
+        driver_subset <- intersect(driver_genes, rownames(binary_matrix))  # only include drivers in matrix
 
         if (length(driver_subset) > 1) {
-            events <- discover.matrix(binary_matrix)
-            num_genes <- length(driver_subset)
-            num_comparisons <- choose(num_genes, 2)
-            cat(sprintf("Running %d pairwise comparisons for %s...\n", num_comparisons, cancer_type))
-            result.mutex <- pairwise.discover.test(events[driver_subset, ])
-            result_list[[cancer_type]] <- as.data.frame(result.mutex)
-            print(paste("Finished:", cancer_type, "with", length(driver_subset), "driver genes"))
+            disc_matrix <- discover.matrix(binary_matrix)
+            cat(sprintf("Running %d pairwise comparisons for %s \n", choose(length(driver_subset), 2), cancer_type))
+            mutexc_result <- pairwise.discover.test(disc_matrix[driver_subset, ], alternative = "less")
+            mutexc_list[[cancer_type]] <- as.data.frame(mutexc_result)  # only stores significant results, default FDR is 1%
+            co_result <- pairwise.discover.test(disc_matrix[driver_subset, ], alternative = "greater")
+            co_list[[cancer_type]] <- as.data.frame(co_result)
         } else {
             print(paste("Skipping:", cancer_type, "- only 1 driver gene found"))
         }
     } else {
-        print(paste("Skipping:", cancer_type, "- no driver genes listed"))
+        print(paste("Skipping:", cancer_type, "- no driver genes"))
     }
 }
 
+# save results to csv files 
+dir.create("results/mutexc", recursive = TRUE, showWarnings = FALSE)
+for (cancer_type in names(mutexc_list)) {
+  write.csv(mutexc_list[[cancer_type]],
+            file = file.path("results/mutexc", paste0(cancer_type, "_mutexc.csv")),
+            row.names = FALSE)
+}
 
-print(result_list[["ACC"]])
-
+dir.create("results/co", recursive = TRUE, showWarnings = FALSE)
+for (cancer_type in names(co_list)) {
+  write.csv(co_list[[cancer_type]],
+            file = file.path("results/co", paste0(cancer_type, "_co.csv")),
+            row.names = FALSE)
+}
 
 # TODO: 
-# save results to a file instead of printing
-# ask to translate from this to base R 
 # look at the results to process them - not sure if this is testing for exc or co 
     # what is the statistical significance 
     # how to pick which pairs we want to look at (record number) - maybe try groupwise or see if some have significance like pathways?
