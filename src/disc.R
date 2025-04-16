@@ -65,7 +65,7 @@ for (file_path in file_list) {
 saveRDS(mutexc_list, "results/mutexc_list.rds")
 saveRDS(co_list, "results/co_list.rds")
 
-# save results to csv files 
+# save results to csv files (only creates a csv if there are significant pair results)
 file.create("results/no_mutexc.txt")
 dir.create("results/mutexc", recursive = TRUE, showWarnings = FALSE)
 for (cancer_type in names(mutexc_list)) {
