@@ -50,8 +50,7 @@ for node in G.nodes():
         count = len(tp53_interactions.get(node, []))
         node_colors.append(cmap(norm(count)))
 
-# Draw the network
-plt.figure(figsize=(12, 10))
+fig, ax = plt.subplots(figsize=(12, 10))
 pos = nx.spring_layout(G, seed=42)
 edges_weights = [G[u][v]['weight'] for u, v in G.edges()]
 
@@ -61,12 +60,13 @@ nx.draw(G, pos,
         font_size=10,
         width=edges_weights,
         edge_color='gray',
-        node_color=node_colors)
+        node_color=node_colors,
+        ax=ax)  # Pass axes here
 
-# Add colorbar
+# Add colorbar correctly
 sm = plt.cm.ScalarMappable(cmap=cmap, norm=norm)
 sm.set_array([])
-cbar = plt.colorbar(sm, shrink=0.7)
+cbar = fig.colorbar(sm, ax=ax, shrink=0.7)
 cbar.set_label('Number of Cohorts (Mutually Exclusive)', fontsize=12)
 
 plt.title("TP53 Mutual Exclusivity Network (Node Color = Cohort Count)", fontsize=14)
