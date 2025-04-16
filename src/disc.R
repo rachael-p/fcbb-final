@@ -8,7 +8,7 @@ library(dplyr)
 
 # import data
 directory <- "data/mutations"
-file_list <- list.files(directory, pattern = "\\.txt$", full.names = TRUE)
+file_list <- list.files(directory, pattern = "\\.txt$", full.names = TRUE)[2]
 mutexc_list <- list()
 co_list <- list()
 driver_ref <- read_csv("results/mdg_per_cohort.csv", show_col_types = FALSE)
@@ -61,27 +61,36 @@ for (file_path in file_list) {
     }
 }
 
+# save results to compressed binary files so they can be loaded into other scripts 
+saveRDS(mutexc_list, "results/mutexc_list.rds")
+saveRDS(co_list, "results/co_list.rds")
+
 # save results to csv files 
-# TODO: change this so it only creates a file if list[[cancer_type]] is not empty 
 dir.create("results/mutexc", recursive = TRUE, showWarnings = FALSE)
 for (cancer_type in names(mutexc_list)) {
-  write.csv(mutexc_list[[cancer_type]],
-            file = file.path("results/mutexc", paste0(cancer_type, "_mutexc.csv")),
-            row.names = FALSE)
+  if (nrow(mutexc_list[[cancer_type]]) > 0) {
+    write.csv(mutexc_list[[cancer_type]],
+        file = file.path("results/mutexc", paste0(cancer_type, "_mutexc.csv")),
+        row.names = FALSE)
+  } else {
+    write(cancer_type, file = "results/no_mutexc.txt", append = TRUE)
+  }
 }
 
 dir.create("results/co", recursive = TRUE, showWarnings = FALSE)
 for (cancer_type in names(co_list)) {
-  write.csv(co_list[[cancer_type]],
-            file = file.path("results/co", paste0(cancer_type, "_co.csv")),
-            row.names = FALSE)
+  if (nrow(co_list[[cancer_type]]) > 0) {
+    write.csv(co_list[[cancer_type]],
+        file = file.path("results/co", paste0(cancer_type, "_co.csv")),
+        row.names = FALSE)
+  } else {
+    write(cancer_type, file = "results/no_co.txt", append = TRUE)
+  }
 }
 
 # TODO: 
 # look at the results to process them - not sure if this is testing for exc or co 
-    # what is the statistical significance 
-    # how to pick which pairs we want to look at (record number) - maybe try groupwise or see if some have significance like pathways?
-    # look at what the discover paper itself did 
+    # maybe try groupwise or see if some have significance like pathways?
     # also for the paper see if other studies have used discover vs. traditional tests
     # how can it help achieve goal of informing selection of therapeutic targets like synthetic lethal strategies
     # maybe go a bit deeper
