@@ -8,7 +8,7 @@ library(dplyr)
 
 # import data
 directory <- "data/mutations"
-file_list <- list.files(directory, pattern = "\\.txt$", full.names = TRUE)[2]
+file_list <- list.files(directory, pattern = "\\.txt$", full.names = TRUE)
 mutexc_list <- list()
 co_list <- list()
 driver_ref <- read_csv("results/mdg_per_cohort.csv", show_col_types = FALSE)
@@ -66,6 +66,7 @@ saveRDS(mutexc_list, "results/mutexc_list.rds")
 saveRDS(co_list, "results/co_list.rds")
 
 # save results to csv files 
+file.create("results/no_mutexc.txt")
 dir.create("results/mutexc", recursive = TRUE, showWarnings = FALSE)
 for (cancer_type in names(mutexc_list)) {
   if (nrow(mutexc_list[[cancer_type]]) > 0) {
@@ -77,6 +78,7 @@ for (cancer_type in names(mutexc_list)) {
   }
 }
 
+file.create("results/no_co.txt")
 dir.create("results/co", recursive = TRUE, showWarnings = FALSE)
 for (cancer_type in names(co_list)) {
   if (nrow(co_list[[cancer_type]]) > 0) {
