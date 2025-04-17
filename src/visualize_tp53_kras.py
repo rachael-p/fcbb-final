@@ -95,7 +95,7 @@ def visualize_top_genes(mutexc_dir, top_gene):
 
     plt.title(f"{top_gene} Mutual Exclusivity Network (Node Color = Cohort Count)", fontsize=14)
     plt.tight_layout()
-    plt.savefig(f"../results/{top_gene}_mutexc_network_colored.png", dpi=300)
+    plt.savefig(f"../results/mutexc_network_colored_{top_gene}.png", dpi=300)
     plt.close()
     
 mutexc_dir = "../results/mutexc"
