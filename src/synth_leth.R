@@ -4,6 +4,7 @@
 # how can this add new insights: 
     # provides context for SL pairs in databases (not sure if this exists already or not): a lot of pairs are cancer-agnostic so can provide evidence for relevance in specific cancer
         # ex. “These two genes are mutually exclusive in breast cancer, at high statistical significance (FDR 0.01) — this matches an SL pair in SynLethDB.”
+        # see if there are therapies / research around these high-confidence mutually exclusive SL pairs already
     # our mutually exclusive pairs may propose new or unstudied SL candidates (future directions to further analyze this) - since SL pairs are often mutually exclusive since don't want the cell to die if trying to develop tumor
     # if find an SL pair from mutexc results but that pair is also co-occuring in a different cohort then it provides tissue-specific biological insights and can guide therapeutic strategies if SL databases don't specify tissue
 
@@ -76,7 +77,7 @@ mutexc_df_filt <- mutexc_df %>%
     gene2_freq = gene_counts[gene2],
     pair_recurrence = gene1_freq + gene2_freq
   )
-mutexc_ranked <- mutexc_df_filt %>%
+mutexc_ranked <- mutexc_df_filt %>%  # rank it based on statistical significance and recurrence 
   arrange(q.value) %>%
   mutate(
     rank_score = (1 / q.value) + pair_recurrence
