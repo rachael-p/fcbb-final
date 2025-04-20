@@ -45,7 +45,7 @@ sl_db <- sl_db %>%
     gene1 = toupper(trimws(gene1)),
     gene2 = toupper(trimws(gene2)),
   )
-sl_db <- sl_db[sl_db$r.statistic_score >= 0.8, ]  # only keeps high confidence SL pairs
+sl_db <- sl_db[sl_db$r.statistic_score >= 0.85, ]  # only keeps high confidence SL pairs
 
 mutexc_df$in_SL <- mapply(function(g1, g2) {
   any(

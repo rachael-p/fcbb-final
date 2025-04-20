@@ -25,6 +25,7 @@ This project explores the mutation landscape of driver genes across The Cancer G
 .
 ├── data/
 │   ├── driver_genes.xlsx            # Reference driver gene list from Bailey et al. 2018
+│   ├── Human_SL.csv                 # Synthetic lethal interaction database SynLethDB
 │   └── mutations/                   # TCGA mutation data (gene-by-sample matrices, one .txt file per cohort)
 ├── results/
 │   ├── co/                          # CSV files of co-occurring gene pairs by cohort
@@ -33,7 +34,10 @@ This project explores the mutation landscape of driver genes across The Cancer G
 ├── src/
 │   ├── visualize_co_mutexc.py       # Co-occurrence / mutual exclusivity counts and gene-bar plots
 │   ├── visualize_mdg_tcga.py        # Mutation frequency and driver gene summaries
-│   └── visualize_tp53_kras.py       # Network visualizations for TP53 and KRAS
+│   ├── disc.R                       # Mutual exclusion and co-occurrence analyses using DISCOVER
+│   ├── visualize_tp53_kras.py       # Network visualizations for TP53 and KRAS
+│   └── synth_leth.R                 # Matching our ME results against SynLethDB and potential candidates
+
 ```
 
 ---
@@ -47,6 +51,8 @@ This project explores the mutation landscape of driver genes across The Cancer G
   https://xenabrowser.net/datapages/  
   Example: *TCGA.LAML.sampleMap/mutation_wustl_gene.gz*
 
+- **Synthetic Lethal Database** (SynLethDB):  
+  https://synlethdb.sist.shanghaitech.edu.cn/#/download
 ---
 
 ## Code Overview
@@ -84,6 +90,14 @@ This project explores the mutation landscape of driver genes across The Cancer G
 
 ---
 
+### `disc.R`
+
+- **Input:** `driver_genes.xlsx` and mutation files from `data/mutations/`
+- **Output:**
+  - finish
+
+---
+
 ## How to Run
 
 > All scripts assume you are running from the `src/` directory and paths are relative.
@@ -112,6 +126,7 @@ This project enables:
 - Comparing mutation exclusivity vs co-occurrence patterns
 - Exploring interaction networks of key driver genes (e.g., TP53, KRAS)
 - Proposing hypotheses for potential functional interactions or pathway redundancies
+- Analysis of overlap with synthetic lethal interactions
 
 ---
 

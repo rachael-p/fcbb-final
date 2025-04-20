@@ -65,7 +65,7 @@ for (file_path in file_list) {
 saveRDS(mutexc_list, "results/mutexc_list.rds")
 saveRDS(co_list, "results/co_list.rds")
 
-# save results to csv files (only creates a csv if there are significant pair results)
+# save results to csv files (only creates a csv if there are significant pair results - otherwise cohort name goes added to txt file)
 file.create("results/no_mutexc.txt")
 dir.create("results/mutexc", recursive = TRUE, showWarnings = FALSE)
 for (cancer_type in names(mutexc_list)) {
@@ -90,13 +90,3 @@ for (cancer_type in names(co_list)) {
   }
 }
 
-# TODO: 
-# look at the results to process them - not sure if this is testing for exc or co 
-    # maybe try groupwise or see if some have significance like pathways?
-    # also for the paper see if other studies have used discover vs. traditional tests
-    # how can it help achieve goal of informing selection of therapeutic targets like synthetic lethal strategies
-    # maybe go a bit deeper
-# then find biological hypotheses
-# also start looking at survival data 
-    # how co or exc presence influence patient survival since now that we have a list of significant ones we can check if patients have them (but are the samples the same)
-    # store the significant ones in a csv 
