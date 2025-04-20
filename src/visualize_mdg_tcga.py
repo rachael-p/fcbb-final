@@ -1,4 +1,4 @@
-# Visualize mutated driver genes in TCGA cohorts
+# Visualize mutated driver genes (mdg) in TCGA cohorts
 
 # Get required libraries
 import os
@@ -17,7 +17,7 @@ def get_driver_genes(xlsx_file):
 
 def get_mutation_counts_frequency(mutations_directory, driver_genes):
     """
-    Returns 1D array with number of mutations in each cohort (mutation file)
+    Return a 1D array with number of mutations in each cohort (mutation file)
     and a DataFrame with mutation frequency for each driver gene per cohort 
     """
     mutation_counts = {}
@@ -79,20 +79,23 @@ def create_mdg_list_per_cohort(mutation_freqs_df):
     df.to_csv("../results/mdg_per_cohort.csv", index=False)
 
 def create_top_mdg(mutation_freqs_df, num_top, freq_status):
-    """Save number of cohorts and average mutation frequency for most num_top mutated driver genes"""
+    """
+    Save the number of cohorts and average mutation frequency for 
+    most num_top mutated driver genes
+    """
     mdg = mutation_freqs_df[mutation_freqs_df.sum(axis=1) > 0]
-    sorting_factor = "Avg_Freq" if freq_status else "Num_Cohorts"
+    sorting_factor = "avg_freq" if freq_status else "num_cohorts"
     top_mdg = (
         mdg
         .apply(lambda row: pd.Series({
-            "Num_Cohorts": (row > 0).sum(),
-            "Avg_Freq": row[row > 0].mean()
+            "num_cohorts": (row > 0).sum(),
+            "avg_freq": row[row > 0].mean()
         }), axis=1)
         .sort_values(by=sorting_factor, ascending=False)
         .head(num_top)
     )
     top_mdg.index.name = "mdg"
-    top_mdg.to_csv(f"../results/top_{num_top}_{sorting_factor}_mdg.csv")
+    top_mdg.to_csv(f"../results/mdg_top_{num_top}_{sorting_factor}.csv")
 
 # Get driver genes from Bailey et al.'s reference list
 driver_genes = get_driver_genes("../data/driver_genes.xlsx")
