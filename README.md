@@ -92,9 +92,20 @@ This project explores the mutation landscape of driver genes across The Cancer G
 
 ### `disc.R`
 
-- **Input:** `driver_genes.xlsx` and mutation files from `data/mutations/`
+- **Input:** `results/mdg_per_cohort.csv` and mutation files from `data/mutations/`
 - **Output:**
-  - finish
+  - `results/mutexc_list.rds` and `results/co_list.rds`: RDS files with full pairwise data 
+  - `results/no_mutexc.txt` and `results/no_co.txt`: list of cohorts with no significant respective pairwise interactions
+  - `results/mutexc` and `results/co`: directories with csv files containing significant pairs for cohorts with them
+
+---
+
+### `synth_leth.R`
+
+- **Input:** `results/mutexc_list.rds` and `data/Human_SL.csv`
+- **Output:**
+  - `results/SL_hits_high_conf.csv`: high-confidence significantly mutually exclusive hits in SL database
+  - `results/potential_SL_targets.csv`: top 10 potential SL pairs for exploration, based on ME significance and how often the pair occurs in cohorts 
 
 ---
 
@@ -107,15 +118,26 @@ This project explores the mutation landscape of driver genes across The Cancer G
 python visualize_mdg_tcga.py
 ```
 
-2. **Visualize co-occurrence vs mutual exclusivity across cohorts:**
+2. **Run mutual exclusivity and co-occurence DISCOVER pairwise analyses:**
+```bash
+Rscript disc.R
+```
+
+3. **Visualize co-occurrence vs mutual exclusivity across cohorts:**
 ```bash
 python visualize_co_mutexc.py
 ```
 
-3. **Generate mutual exclusivity networks for TP53 and KRAS:**
+4. **Generate mutual exclusivity networks for TP53 and KRAS:**
 ```bash
 python visualize_tp53_kras.py
 ```
+
+5. **Run synthetic lethality analyses:**
+```bash
+Rscript synth_leth.R
+```
+
 
 ---
 
@@ -148,11 +170,3 @@ pip install pandas matplotlib seaborn networkx openpyxl
 - Charissa Luk: cluk4@jhu.edu
 
 ---
-
-Source for driver gene list: https://pmc.ncbi.nlm.nih.gov/articles/instance/6029450/bin/NIHMS948705-supplement-8.xlsx
-
-Source for TCGA mutation data (TCGA hub in USC Xena): https://xenabrowser.net/datapages/
-
-Github for DISCOVER: https://github.com/NKI-CCB/DISCOVER
-
-Data for synthetic lethal pairs: https://synlethdb.sist.shanghaitech.edu.cn/#/download 

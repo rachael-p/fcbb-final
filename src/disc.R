@@ -7,11 +7,11 @@ library(tidyr)
 library(dplyr)
 
 # import data
-directory <- "data/mutations"
+directory <- "../data/mutations"
 file_list <- list.files(directory, pattern = "\\.txt$", full.names = TRUE)
 mutexc_list <- list()
 co_list <- list()
-driver_ref <- read_csv("results/mdg_per_cohort.csv", show_col_types = FALSE)
+driver_ref <- read_csv("../results/mdg_per_cohort.csv", show_col_types = FALSE)
 driver_ref$Mutated_Driver_List <- strsplit(driver_ref$Mutated_Driver_Genes, ",")
 driver_ref$Mutated_Driver_List <- lapply(driver_ref$Mutated_Driver_List, function(x) toupper(trimws(x)))
 
@@ -62,31 +62,31 @@ for (file_path in file_list) {
 }
 
 # save results to compressed binary files so they can be loaded into other scripts 
-saveRDS(mutexc_list, "results/mutexc_list.rds")
-saveRDS(co_list, "results/co_list.rds")
+saveRDS(mutexc_list, "../results/mutexc_list.rds")
+saveRDS(co_list, "../results/co_list.rds")
 
 # save results to csv files (only creates a csv if there are significant pair results - otherwise cohort name goes added to txt file)
-file.create("results/no_mutexc.txt")
-dir.create("results/mutexc", recursive = TRUE, showWarnings = FALSE)
+file.create("../results/no_mutexc.txt")
+dir.create("../results/mutexc", recursive = TRUE, showWarnings = FALSE)
 for (cancer_type in names(mutexc_list)) {
   if (nrow(mutexc_list[[cancer_type]]) > 0) {
     write.csv(mutexc_list[[cancer_type]],
-        file = file.path("results/mutexc", paste0(cancer_type, "_mutexc.csv")),
+        file = file.path("../results/mutexc", paste0(cancer_type, "_mutexc.csv")),
         row.names = FALSE)
   } else {
-    write(cancer_type, file = "results/no_mutexc.txt", append = TRUE)
+    write(cancer_type, file = "../results/no_mutexc.txt", append = TRUE)
   }
 }
 
-file.create("results/no_co.txt")
-dir.create("results/co", recursive = TRUE, showWarnings = FALSE)
+file.create("../results/no_co.txt")
+dir.create("../results/co", recursive = TRUE, showWarnings = FALSE)
 for (cancer_type in names(co_list)) {
   if (nrow(co_list[[cancer_type]]) > 0) {
     write.csv(co_list[[cancer_type]],
-        file = file.path("results/co", paste0(cancer_type, "_co.csv")),
+        file = file.path("../results/co", paste0(cancer_type, "_co.csv")),
         row.names = FALSE)
   } else {
-    write(cancer_type, file = "results/no_co.txt", append = TRUE)
+    write(cancer_type, file = "../results/no_co.txt", append = TRUE)
   }
 }
 

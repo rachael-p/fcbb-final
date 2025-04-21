@@ -27,7 +27,7 @@ find_sl_info <- function(g1, g2, sl_db) {
   }
 }
 
-mutexc_list <- readRDS("results/mutexc_list.rds")
+mutexc_list <- readRDS("../results/mutexc_list.rds")
 mutexc_list <- mutexc_list[sapply(mutexc_list, nrow) > 0]  # get rid of empty types
 mutexc_df <- bind_rows(  # combine all rows in list and add cancer_type column
   lapply(names(mutexc_list), function(cancer_type) {
@@ -38,7 +38,7 @@ mutexc_df <- bind_rows(  # combine all rows in list and add cancer_type column
 )
 print(paste("Total mutexc pairs: ", nrow(mutexc_df)))
 
-sl_db <- read.csv("data/Human_SL.csv", stringsAsFactors = FALSE)
+sl_db <- read.csv("../data/Human_SL.csv", stringsAsFactors = FALSE)
 colnames(sl_db)[c(1, 3)] <- c("gene1", "gene2")
 sl_db <- sl_db %>%
   mutate(
@@ -64,7 +64,7 @@ SL_hits$SL_score <- as.numeric(matched_info[2, ])
 SL_hits$in_SL <- NULL
 
 print(paste("Number of SL hits:", nrow(SL_hits)))
-write.csv(SL_hits, "results/SL_hits_high_conf.csv", row.names = FALSE)
+write.csv(SL_hits, "../results/SL_hits_high_conf.csv", row.names = FALSE)
 
 
 
@@ -84,4 +84,4 @@ mutexc_ranked <- mutexc_df_filt %>%  # rank it based on statistical significance
   ) %>%
   arrange(desc(rank_score))
 top_10 <- mutexc_ranked %>% slice_head(n = 10)
-write.csv(top_10, "results/potential_SL_targets.csv", row.names = FALSE)
+write.csv(top_10, "../results/potential_SL_targets.csv", row.names = FALSE)
